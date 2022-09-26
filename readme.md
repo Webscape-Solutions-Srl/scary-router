@@ -1,9 +1,5 @@
-jQuery Single Page Application Plugin
+Scary Router - Enhanced jQuery Single Page Application Plugin
 =====================================
-> **Important** : This version is not ready for contribution yet, since this
-my bachelor thesis and it is not graduated yet. 
-
-
 
 > A jQuery plugin which enables you to easily create an Single Page Application
 
@@ -30,6 +26,11 @@ The public API offers you:
 - A data component which is responsible for any asynchronous data retrieval via AJAX.
 - A proxy component to facade the usage of the above described components.
 
+Webscape solutions added:
+
+- Parameters handling in the url passed to callback (eg.: /path/{param} will call callback(param))
+- Callback is never called :-) Some jQuery events are triggered instead (init, content, exit for each given callback)
+
 ## Checkout the source code
 If you want to clone and checkout the source code on your local machine, then simply
 do the following after cloning the repository:
@@ -43,14 +44,14 @@ gulp
 
 Download the [production version][min] or the [development version][max].
 
-[min]: https://raw.githubusercontent.com/cwasser/jquery-jquery-spa/master/dist/jquery.spa-v1.0.0.min.js
-[max]: https://raw.githubusercontent.com/cwasser/jquery-jquery-spa/master/dist/jquery.spa-v1.0.0.js
+[min]: https://raw.githubusercontent.com/Webscape-Solutions-Srl/scary-router/master/dist/jquery.scary-router-1.0.1.min.js
+[max]: https://raw.githubusercontent.com/Webscape-Solutions-Srl/scary-router/master/dist/jquery.scary-router-1.0.1.js
 
 In your web page:
 
 ```html
 <script src="jquery.js"></script>
-<script src="jquery.spa-v1.0.0.min.js"></script>
+<script src="jquery.scary-router-1.0.1.min.js"></script>
 <script>
   jQuery(function ($) {
     // Configure the plugin here

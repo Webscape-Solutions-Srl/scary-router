@@ -1,7 +1,7 @@
 {
-  "name": "jquery.spa",
-  "version": "1.0.0",
-  "title": "jQuery Single Page Page Application Plugin",
+  "name": "jquery.scary-router",
+  "version": "1.0.1",
+  "title": "jQuery Single Page Page Application Plugin - Scary Router",
   "description": "jQuery Plugin which provides simple SPA functionality for your website",
   "main": "src/jquery.spa.js",
   "keywords": [
@@ -12,23 +12,24 @@
     "jquery extension",
     "jquery-spa",
     "spa",
-    "single page application"
+    "single page application",
+    "scary-router"
   ],
   "author": {
-    "name": "Christian Wasser",
-    "email": "admin@chwasser.de",
+    "name": "Webscape Solutions SRL",
+    "email": "info@webscape.it",
     "url": "https://github.com/cwasser",
     "role": "Maintainer"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/cwasser/jquery-spa.git"
+    "url": "git+https://github.com/Webscape-Solutions-Srl/scary-router.git"
   },
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/cwasser/jquery-spa/issues"
+    "url": "https://github.com/Webscape-Solutions-Srl/scary-routera/issues"
   },
-  "homepage": "https://github.com/cwasser/jquery-spa#readme",
+  "homepage": "https://github.com/Webscape-Solutions-Srl/scary-router#readme",
   "scripts": {
     "test": "gulp"
   },
