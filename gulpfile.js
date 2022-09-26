@@ -40,7 +40,7 @@ var DEST = './dist/',
         debug : true
     },
     VERSION = 'v1.0.0',
-    TARGET_FILENAME = 'jquery.spa-'+VERSION+'.js';
+    TARGET_FILENAME = 'jquery.scary-router-'+VERSION+'.js';
 
 var logTime = function(){
     var date = new Date();
