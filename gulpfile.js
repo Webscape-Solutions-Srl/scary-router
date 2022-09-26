@@ -39,7 +39,7 @@ var DEST = './dist/',
         entries : SRC_FILES,
         debug : true
     },
-    VERSION = 'v1.0.0',
+    VERSION = 'v1.0.1',
     TARGET_FILENAME = 'jquery.scary-router-'+VERSION+'.js';
 
 var logTime = function(){
