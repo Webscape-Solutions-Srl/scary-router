@@ -44,8 +44,8 @@ gulp
 
 Download the [production version][min] or the [development version][max].
 
-[min]: https://raw.githubusercontent.com/Webscape-Solutions-Srl/scary-router/master/dist/jquery.scary-router-1.0.1.min.js
-[max]: https://raw.githubusercontent.com/Webscape-Solutions-Srl/scary-router/master/dist/jquery.scary-router-1.0.1.js
+[min]: https://raw.githubusercontent.com/Webscape-Solutions-Srl/scary-router/master/dist/jquery.scary-router-v1.0.1.min.js
+[max]: https://raw.githubusercontent.com/Webscape-Solutions-Srl/scary-router/master/dist/jquery.scary-router-v1.0.1.js
 
 In your web page:
 
