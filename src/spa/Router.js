@@ -83,13 +83,12 @@ module.exports = (function( $ ) {
      *                  findable within the jQuery SPA Data component.
      */
     _findRoute = function ( route, httpMethod ) {
-        // Do not use $.inArray() here, because the array contains objects
         return _.findIndex(
             stateMap.routes,
-            {
-                route : route,
-                httpMethod : (typeof httpMethod === 'undefined' ) ? 'GET' : httpMethod
-            }
+			function(obj){
+				let routeRegex = new RegExp('^' + obj.route.replaceAll('/', '\/').replaceAll(/{[a-z0-9_]+}/ig, '[^\/]+?') + '$', 'i');
+				return route.match(routeRegex) && (obj.httpMethod === (typeof httpMethod === 'undefined' ) ? 'GET' : httpMethod);
+			}
         );
     };
 
@@ -168,12 +167,21 @@ module.exports = (function( $ ) {
         // This function will only be called by the History, so it will always be an resource with GET,
         // because URL changes happens only to reflect another state than before.
         var routeObj = _getRoute( obj.route, 'GET' );
+		
+		let routeRegex = new RegExp('^' + routeObj.route.replaceAll('/', '\/').replaceAll(/{[a-z0-9_]+}/ig, '([^\/]+?)') + '$', 'i');
+		let paramsName = [...routeObj.route.matchAll(/{[a-z0-9_]+}/ig)];
+		let paramsValue = obj.route.match(routeRegex);
+		
+		let params = {};
+		paramsName.forEach(function(param, idx){
+			params[param[0].slice(1, -1)] = paramsValue[idx + 1];
+		});
 
         // Any data retrieval wanted for this URL from the server?
         if ( routeObj.isResource ) {
             routeObj.callback = _performDataRequest( routeObj, {} );
         }
-        routeObj.callback();
+        routeObj.callback(params);
     });
     //----------------- END INTERNAL METHODS ------------------------------
     //----------------- BEGIN PUBLIC METHODS ------------------------------
