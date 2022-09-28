@@ -1,6 +1,7 @@
 /**
  * Created by cwasser on 09.04.16.
  */
+/*jshint esversion: 9 */
 var _ = require('lodash');
 /**
  * spa/Router.js
@@ -84,11 +85,22 @@ module.exports = (function( $ ) {
      */
     _findRoute = function ( route, httpMethod ) {
         // Do not use $.inArray() here, because the array contains objects
+        // return _.findIndex(
+        //     stateMap.routes,
+        //     {
+        //         route : route,
+        //         httpMethod : (typeof httpMethod === 'undefined' ) ? 'GET' : httpMethod
+        //     }
+        // );
         return _.findIndex(
             stateMap.routes,
-            {
-                route : route,
-                httpMethod : (typeof httpMethod === 'undefined' ) ? 'GET' : httpMethod
+            function (obj) {
+              if (typeof obj.route !== 'string') {
+                return false;
+              }
+              let routeRegex = new RegExp('^' + obj.route.replaceAll('/', '\/').replaceAll(/\/{[^}\/]+}(\/)?/ig, '\/[^\/]+$1') + '$', 'i');
+
+              return route.match(routeRegex) && httpMethod === (typeof obj.httpMethod === 'undefined' ? 'GET' : obj.httpMethod);
             }
         );
     };
@@ -167,13 +179,33 @@ module.exports = (function( $ ) {
     $(window).on('jQuery.spa.locationChange', function ( event, obj ) {
         // This function will only be called by the History, so it will always be an resource with GET,
         // because URL changes happens only to reflect another state than before.
-        var routeObj = _getRoute( obj.route, 'GET' );
+        let routeObj = _getRoute( obj.route, 'GET' );
+		    let params = {};
+        let paramsValues = obj.route.split('/').filter(item => item.length > 0);
 
-        // Any data retrieval wanted for this URL from the server?
-        if ( routeObj.isResource ) {
-            routeObj.callback = _performDataRequest( routeObj, {} );
+        let paramRegexp = new RegExp('{[^}]+}');
+        if (typeof routeObj.route === 'string' && routeObj.route.length > 0) {
+          routeObj.route.split('/').forEach(function (route_elem, i) {
+            if (route_elem.match(paramRegexp)) {
+              params[route_elem.slice(1, -1)] = paramsValues[i - 1];
+            }
+          });
+
+          // Any data retrieval wanted for this URL from the server?
+          if (routeObj.isResource) {
+            routeObj.callback = _performDataRequest(routeObj, {});
+          }
+
+          const queryString = window.location.search;
+          const urlParams = new URLSearchParams(queryString);
+          if (urlParams.toString().length > 0) {
+            params.urlParams = urlParams;
+          }
+          // Handle route phases
+          routeObj.callback(...Object.values(params));
+        } else {
+          $(document).trigger('404');
         }
-        routeObj.callback();
     });
     //----------------- END INTERNAL METHODS ------------------------------
     //----------------- BEGIN PUBLIC METHODS ------------------------------

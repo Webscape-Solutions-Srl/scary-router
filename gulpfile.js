@@ -11,7 +11,7 @@ var gulp = require('gulp'),
     // rename a file
     rename = require('gulp-rename'),
     // uglify js for minimizing
-    uglify = require('gulp-uglify'),
+    uglify = require('gulp-uglify-es').default,
     // concat for concat all js files
     concat = require('gulp-concat'),
     // sourcemaps out of the browserify
@@ -70,7 +70,9 @@ gulp.task('build', ['browserify'],function(){
     return gulp.src([DEST + TARGET_FILENAME])
         .pipe(gulp.dest(DEST))
         .pipe(sourcemaps.init({loadMaps: true}))
-        .pipe(uglify())
+        .pipe(uglify().on('error', function(e){
+            console.log(e);
+         }))
         .pipe(rename({extname: '.min.js'}))
         .pipe(sourcemaps.write('./'))
         .pipe(gulp.dest(DEST));
