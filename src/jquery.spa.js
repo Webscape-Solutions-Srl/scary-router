@@ -5,7 +5,7 @@
  * Copyright (c) 2016 Christian Wasser
  * Licensed under the MIT license.
  */
-var _ = require('lodash');
+var _ = _ || require('lodash');
 
 (function ( $, _ ) {
     'use strict';

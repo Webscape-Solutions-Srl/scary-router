@@ -19,7 +19,7 @@ The public API offers you:
 - Capsulized components within the plugin: A router, history and data component
 - An well documented API and also annotated source code (checkout the source folder)
 - Configurable components to modify the default behaviour
-- A router where you can configure your routes with the callbacks for these routes
+- A router where you can configure your routes with classes containing callbacks for these routes
 - A decoupled history component, which handles the URL and browser history manipulation
   to prevent any complete site reloads. This manipulation will be done either by the
   HTML5 History-API or by using hashes in your URL, depending on your configuration.
@@ -29,7 +29,8 @@ The public API offers you:
 Webscape solutions added:
 
 - Parameters handling in the url passed to callback (eg.: /path/{param} will call callback(param))
-- Callback is never called :-) Some jQuery events are triggered instead (init, content, exit for each given callback)
+- Callback is never called :-) Callback must be a valid and imported unique class name implementing the methods init() content() and exit() (only content() is mandatory)
+- Plugins and app can catch page phases and inject their own logic (including throwing errors using events and stopping code execution)
 
 ## Checkout the source code
 If you want to clone and checkout the source code on your local machine, then simply

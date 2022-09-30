@@ -1,7 +1,9 @@
 /**
  * Created by cwasser on 09.04.16.
  */
+/*jshint esversion: 9 */
 var _ = require('lodash');
+const {errors} = require("jshint/src/messages");
 /**
  * spa/Router.js
  * @description This component is responsible for the routing within the jQuery SPA plugin.
@@ -12,7 +14,7 @@ var _ = require('lodash');
  * @type {{configModule, navigate, createResource, updateResource, deleteResource, addRoute, removeRoute}}
  */
 module.exports = (function( $ ) {
-    'use strict';
+    // 'use strict';
     //----------------- BEGIN MODULE SCOPE VARIABLES ----------------------
     var defaults = {
             routes : [],
@@ -84,11 +86,22 @@ module.exports = (function( $ ) {
      */
     _findRoute = function ( route, httpMethod ) {
         // Do not use $.inArray() here, because the array contains objects
+        // return _.findIndex(
+        //     stateMap.routes,
+        //     {
+        //         route : route,
+        //         httpMethod : (typeof httpMethod === 'undefined' ) ? 'GET' : httpMethod
+        //     }
+        // );
         return _.findIndex(
             stateMap.routes,
-            {
-                route : route,
-                httpMethod : (typeof httpMethod === 'undefined' ) ? 'GET' : httpMethod
+            function (obj) {
+              if (typeof obj.route !== 'string') {
+                return false;
+              }
+              let routeRegex = new RegExp('^' + obj.route.replaceAll('/', '\/').replaceAll(/\/{[^}\/]+}(\/)?/ig, '\/[^\/]+$1') + '$', 'i');
+
+              return route.match(routeRegex) && httpMethod === (typeof obj.httpMethod === 'undefined' ? 'GET' : obj.httpMethod);
             }
         );
     };
@@ -161,20 +174,96 @@ module.exports = (function( $ ) {
 
     /**
      * @description This listener will be registered instantly and will listen on specific events from the
-     * jQuery SPA History component. When the event it triggered, this will execute the callback
+     * jQuery SPA History component. When the event is triggered, this will execute the callback
      * after the History manipulation.
      */
-    $(window).on('jQuery.spa.locationChange', function ( event, obj ) {
+    $(window).on('jQuery.spa.locationChange', async function ( event, obj ) {
         // This function will only be called by the History, so it will always be an resource with GET,
         // because URL changes happens only to reflect another state than before.
-        var routeObj = _getRoute( obj.route, 'GET' );
+        let routeObj = _getRoute( obj.route, 'GET' );
+		    let params = {};
+        let paramsValues = obj.route.split('/').filter(item => item.length > 0);
 
-        // Any data retrieval wanted for this URL from the server?
-        if ( routeObj.isResource ) {
-            routeObj.callback = _performDataRequest( routeObj, {} );
+        if (typeof routeObj.route === 'string' && routeObj.route.length > 0) {
+          let paramRegexp = new RegExp('{[^}]+}');
+
+          routeObj.route.split('/').forEach(function (route_elem, i) {
+            if (route_elem.match(paramRegexp)) {
+              params[route_elem.slice(1, -1)] = paramsValues[i - 1];
+            }
+          });
+
+          // Any data retrieval wanted for this URL from the server?
+          if (routeObj.isResource) {
+            routeObj.callback = _performDataRequest(routeObj, {});
+          }
+
+          const queryString = window.location.search;
+          const urlParams = new URLSearchParams(queryString);
+          if (urlParams.toString().length > 0) {
+            params.urlParams = urlParams;
+          }
+
+          // Handle route phases
+          const phases = [
+            'exit',
+            'exit-page',
+            'init-page',
+            'init',
+            'content-page',
+            'content'
+          ];
+
+          await phases.every(async function (phase) {
+            if (phase.indexOf('exit') === 0 && typeof window.exitCallback === 'undefined') {
+              return false;
+            }
+            // Check if system call
+            const callback = phase.indexOf('exit') === 0 ? window.exitCallback : routeObj.callback;
+            /*jshint ignore:start*/
+            if (phase.match(/-page$/)) {
+              switch (phase) {
+                case 'init-page':
+                  if (typeof Init === 'function') {
+                    await executePhase(Init, callback, params);
+                  }
+                  break;
+                case 'content-page':
+                  if (typeof Content === 'function') {
+                    await executePhase(Content, callback, params);
+                  }
+
+                  window.exitCallback = routeObj.callback;
+                  break;
+                case 'exit-page':
+                  if (typeof Exit === 'function') {
+                    await executePhase(Exit, callback, params);
+                  }
+                  break;
+              }
+            } else if (typeof window[callback][phase] === 'function') {
+              // set previous page's callback if exit call
+              await window[callback][phase].apply(window[callback], params);
+            } else if (phase === 'content') {
+              throw new Error("You must implement at least content() in your page class " . routeObj.callback);
+            }
+            /*jshint ignore:end*/
+          });
+        } else {
+          $(document).trigger('404');
         }
-        routeObj.callback();
     });
+
+    async function executePhase(PhaseClass, callback, params) {
+      const phase = new PhaseClass();
+      const fns = Object.keys(phase);
+      fns.sort();
+      for (const fn of fns) {
+        if (typeof phase[fn] === 'function') {
+          await PhaseClass[fn].apply(PhaseClass, { callback, params });
+        }
+      }
+    }
     //----------------- END INTERNAL METHODS ------------------------------
     //----------------- BEGIN PUBLIC METHODS ------------------------------
     /**
