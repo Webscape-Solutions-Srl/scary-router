@@ -224,39 +224,27 @@ module.exports = (function( $ ) {
               switch (phase) {
                 case 'init-page':
                   if (typeof Init === 'function') {
-                    const init = new Init();
-                    for (const fn of Object.keys(init)) {
-                      if (typeof init[fn] === 'function') {
-                        await Init[fn].apply(Init, { 'callback': routeObj.callback, params });
-                      }
-                    }
+                    await executePhase(Init, routeObj.callback, params);
                   }
                   break;
                 case 'content-page':
                   if (typeof Content === 'function') {
-                    const content = new Content();
-                    for (const fn of Object.keys(content)) {
-                      if (typeof content[fn] === 'function') {
-                        await Content[fn].apply(Content, { 'callback': routeObj.callback, params });
-                      }
-                    }
+                    await executePhase(Content, routeObj.callback, params);
                   }
 
                   window.exitCallback = routeObj.callback;
                   break;
                 case 'exit-page':
                   if (typeof Exit === 'function') {
-                    const exit = new Exit();
-                    for (const fn of Object.keys(exit)) {
-                      if (typeof exit[fn] === 'function') {
-                        await Exit[fn].apply(Exit, { 'callback': routeObj.callback, params });
-                      }
-                    }
+                    await executePhase(Exit, window.exitCallback, params);
                   }
                   break;
               }
             } else if (typeof window[routeObj.callback][phase] === 'function') {
-              await window[routeObj.callback][phase].apply(window[routeObj.callback], params);
+              // set previous page's callback if exit call
+              const callback = phase === 'exit' ? window.exitCallback : routeObj.callback;
+
+              await window[callback][phase].apply(window[callback], params);
             } else if (phase === 'content') {
               throw new Error("You must implement at least content() in your page class " . routeObj.callback);
             }
@@ -266,6 +254,17 @@ module.exports = (function( $ ) {
           $(document).trigger('404');
         }
     });
+
+    async function executePhase(phaseClass, callback, params) {
+      const phase = new phaseClass();
+      const fns = Object.keys(phase);
+      fns.sort();
+      for (const fn of fns) {
+        if (typeof phase[fn] === 'function') {
+          await phaseClass[fn].apply(phaseClass, { callback, params });
+        }
+      }
+    }
     //----------------- END INTERNAL METHODS ------------------------------
     //----------------- BEGIN PUBLIC METHODS ------------------------------
     /**
