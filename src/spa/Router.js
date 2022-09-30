@@ -3,6 +3,7 @@
  */
 /*jshint esversion: 9 */
 var _ = require('lodash');
+const {errors} = require("jshint/src/messages");
 /**
  * spa/Router.js
  * @description This component is responsible for the routing within the jQuery SPA plugin.
@@ -13,7 +14,7 @@ var _ = require('lodash');
  * @type {{configModule, navigate, createResource, updateResource, deleteResource, addRoute, removeRoute}}
  */
 module.exports = (function( $ ) {
-    'use strict';
+    // 'use strict';
     //----------------- BEGIN MODULE SCOPE VARIABLES ----------------------
     var defaults = {
             routes : [],
@@ -173,18 +174,19 @@ module.exports = (function( $ ) {
 
     /**
      * @description This listener will be registered instantly and will listen on specific events from the
-     * jQuery SPA History component. When the event it triggered, this will execute the callback
+     * jQuery SPA History component. When the event is triggered, this will execute the callback
      * after the History manipulation.
      */
-    $(window).on('jQuery.spa.locationChange', function ( event, obj ) {
+    $(window).on('jQuery.spa.locationChange', async function ( event, obj ) {
         // This function will only be called by the History, so it will always be an resource with GET,
         // because URL changes happens only to reflect another state than before.
         let routeObj = _getRoute( obj.route, 'GET' );
 		    let params = {};
         let paramsValues = obj.route.split('/').filter(item => item.length > 0);
 
-        let paramRegexp = new RegExp('{[^}]+}');
         if (typeof routeObj.route === 'string' && routeObj.route.length > 0) {
+          let paramRegexp = new RegExp('{[^}]+}');
+
           routeObj.route.split('/').forEach(function (route_elem, i) {
             if (route_elem.match(paramRegexp)) {
               params[route_elem.slice(1, -1)] = paramsValues[i - 1];
@@ -201,8 +203,65 @@ module.exports = (function( $ ) {
           if (urlParams.toString().length > 0) {
             params.urlParams = urlParams;
           }
+
           // Handle route phases
-          routeObj.callback(...Object.values(params));
+          const phases = [
+            'exit',
+            'exit-page',
+            'init-page',
+            'init',
+            'content-page',
+            'content'
+          ];
+
+          await phases.every(async function (phase) {
+            if (phase.indexOf('exit') === 0 && typeof window.exitCallback === 'undefined') {
+              return false;
+            }
+            // Check if system call
+            /*jshint ignore:start*/
+            if (phase.match(/-page$/)) {
+              switch (phase) {
+                case 'init-page':
+                  if (typeof Init === 'function') {
+                    const init = new Init();
+                    for (const fn of Object.keys(init)) {
+                      if (typeof init[fn] === 'function') {
+                        await Init[fn].apply(Init, { 'callback': routeObj.callback, params });
+                      }
+                    }
+                  }
+                  break;
+                case 'content-page':
+                  if (typeof Content === 'function') {
+                    const content = new Content();
+                    for (const fn of Object.keys(content)) {
+                      if (typeof content[fn] === 'function') {
+                        await Content[fn].apply(Content, { 'callback': routeObj.callback, params });
+                      }
+                    }
+                  }
+
+                  window.exitCallback = routeObj.callback;
+                  break;
+                case 'exit-page':
+                  if (typeof Exit === 'function') {
+                    const exit = new Exit();
+                    for (const fn of Object.keys(exit)) {
+                      if (typeof exit[fn] === 'function') {
+                        await Exit[fn].apply(Exit, { 'callback': routeObj.callback, params });
+                      }
+                    }
+                  }
+                  break;
+              }
+            } else if (typeof window[routeObj.callback][phase] === 'function') {
+              await window[routeObj.callback][phase].apply(window[routeObj.callback], params);
+            } else if (phase === 'content') {
+              throw new Error("You must implement at least content() in your page class " . routeObj.callback);
+            }
+            /*jshint ignore:end*/
+          });
         } else {
           $(document).trigger('404');
         }
