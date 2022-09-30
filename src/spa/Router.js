@@ -214,41 +214,42 @@ module.exports = (function( $ ) {
             'content'
           ];
 
-          await phases.every(async function (phase) {
+          for (let phase of phases) {
             if (phase.indexOf('exit') === 0 && typeof window.exitCallback === 'undefined') {
-              return false;
+              continue;
             }
             // Check if system call
             const callback = phase.indexOf('exit') === 0 ? window.exitCallback : routeObj.callback;
             /*jshint ignore:start*/
+            const callbackObj = new callback();
             if (phase.match(/-page$/)) {
               switch (phase) {
                 case 'init-page':
                   if (typeof Init === 'function') {
-                    await executePhase(Init, callback, params);
+                    await executePhase(Init, callback.name, params);
                   }
                   break;
                 case 'content-page':
                   if (typeof Content === 'function') {
-                    await executePhase(Content, callback, params);
+                    await executePhase(Content, callback.name, params);
                   }
 
                   window.exitCallback = routeObj.callback;
                   break;
                 case 'exit-page':
                   if (typeof Exit === 'function') {
-                    await executePhase(Exit, callback, params);
+                    await executePhase(Exit, callback.name, params);
                   }
                   break;
               }
-            } else if (typeof window[callback][phase] === 'function') {
+            } else if (typeof callbackObj[phase] === 'function') {
               // set previous page's callback if exit call
-              await window[callback][phase].apply(window[callback], params);
+              await callbackObj[phase].apply(callbackObj, Object.values(params));
             } else if (phase === 'content') {
-              throw new Error("You must implement at least content() in your page class " . routeObj.callback);
+              throw new Error("You must implement at least content() in your page class " + typeof routeObj.callback);
             }
             /*jshint ignore:end*/
-          });
+          }
         } else {
           $(document).trigger('404');
         }
@@ -256,12 +257,10 @@ module.exports = (function( $ ) {
 
     async function executePhase(PhaseClass, callback, params) {
       const phase = new PhaseClass();
-      const fns = Object.keys(phase);
+      const fns = Object.getOwnPropertyNames(PhaseClass.prototype).filter(item => typeof phase[item] === 'function' && item !== 'constructor');
       fns.sort();
       for (const fn of fns) {
-        if (typeof phase[fn] === 'function') {
-          await PhaseClass[fn].apply(PhaseClass, { callback, params });
-        }
+        await phase[fn].apply(phase, [ callback, params ]);
       }
     }
     //----------------- END INTERNAL METHODS ------------------------------
