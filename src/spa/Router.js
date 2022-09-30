@@ -219,31 +219,30 @@ module.exports = (function( $ ) {
               return false;
             }
             // Check if system call
+            const callback = phase.indexOf('exit') === 0 ? window.exitCallback : routeObj.callback;
             /*jshint ignore:start*/
             if (phase.match(/-page$/)) {
               switch (phase) {
                 case 'init-page':
                   if (typeof Init === 'function') {
-                    await executePhase(Init, routeObj.callback, params);
+                    await executePhase(Init, callback, params);
                   }
                   break;
                 case 'content-page':
                   if (typeof Content === 'function') {
-                    await executePhase(Content, routeObj.callback, params);
+                    await executePhase(Content, callback, params);
                   }
 
                   window.exitCallback = routeObj.callback;
                   break;
                 case 'exit-page':
                   if (typeof Exit === 'function') {
-                    await executePhase(Exit, window.exitCallback, params);
+                    await executePhase(Exit, callback, params);
                   }
                   break;
               }
-            } else if (typeof window[routeObj.callback][phase] === 'function') {
+            } else if (typeof window[callback][phase] === 'function') {
               // set previous page's callback if exit call
-              const callback = phase === 'exit' ? window.exitCallback : routeObj.callback;
-
               await window[callback][phase].apply(window[callback], params);
             } else if (phase === 'content') {
               throw new Error("You must implement at least content() in your page class " . routeObj.callback);
