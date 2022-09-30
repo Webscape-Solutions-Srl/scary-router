@@ -255,13 +255,13 @@ module.exports = (function( $ ) {
         }
     });
 
-    async function executePhase(phaseClass, callback, params) {
-      const phase = new phaseClass();
+    async function executePhase(PhaseClass, callback, params) {
+      const phase = new PhaseClass();
       const fns = Object.keys(phase);
       fns.sort();
       for (const fn of fns) {
         if (typeof phase[fn] === 'function') {
-          await phaseClass[fn].apply(phaseClass, { callback, params });
+          await PhaseClass[fn].apply(PhaseClass, { callback, params });
         }
       }
     }
