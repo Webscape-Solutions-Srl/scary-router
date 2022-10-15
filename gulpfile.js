@@ -83,7 +83,7 @@ gulp.task('jshint',function(){
         .pipe(jshint())
         .pipe(jshint.reporter('jshint-stylish'))
         .pipe(map(function exitOnJsHintFail(file, cb){
-            if(!file.jshint.success) {
+            if(file.jshint && !file.jshint.success) {
                 console.error(logTime() + 'Error! jshint check failed');
                 process.exit();
             }

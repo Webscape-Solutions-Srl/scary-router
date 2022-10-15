@@ -5,7 +5,8 @@
  * Copyright (c) 2016 Christian Wasser
  * Licensed under the MIT license.
  */
-var _ = _ || require('lodash');
+const _ = _ || require('lodash');
+window.jQuery = window.jQuery || require('jquery');
 
 (function ( $, _ ) {
     'use strict';
@@ -30,7 +31,7 @@ var _ = _ || require('lodash');
      * @author Christian Wasser <admin@chwasser.de>
      * @type {{configModule, configHistory, configData, configRouter, addRoutes, addRoute, removeRoute, navigate, getResource, createResource, updateResource, deleteResource, run}}
      */
-    $.spa =  (function () {
+    $.spa = (function () {
         //------------------------- BEGIN MODULE SCOPE VARIABLES ------------------------------------
         // Load internal components
         var Data = require('./spa/Data'),
@@ -43,7 +44,7 @@ var _ = _ || require('lodash');
             configModule, configHistory, configRouter, configData,
             addRoutes, addRoute, removeRoute, hasRoute,
             navigate, createResource, updateResource, deleteResource, getResource,
-            run;
+            setPhasesClasses, run;
         //------------------------- END MODULE SCOPE VARIABLES --------------------------------------
         //------------------------- BEGIN INTERNAL METHODS ------------------------------------------
         //------------------------- END INTERNAL METHODS --------------------------------------------
@@ -178,13 +179,12 @@ var _ = _ || require('lodash');
                         var route = routes[i];
                         if(
                             route.hasOwnProperty('route') &&
-                            route.hasOwnProperty('callback') &&
-                            route.hasOwnProperty('options')
+                            route.hasOwnProperty('callback')
                         ) {
                             addRoute(
                                 route.route,
                                 route.callback,
-                                route.options
+                                route.options || {}
                             );
                         }
                     } else {
@@ -320,6 +320,10 @@ var _ = _ || require('lodash');
             }
         };
 
+        setPhasesClasses = function (classes) {
+          Router.phaseClasses = classes;
+        }
+
         //------------------------- END PUBLIC METHODS ----------------------------------------------
         return {
             // Plugin configuration functions
@@ -339,9 +343,9 @@ var _ = _ || require('lodash');
             createResource : createResource,
             updateResource : updateResource,
             deleteResource : deleteResource,
+            setPhasesClasses: setPhasesClasses,
             // Starting the plugin - NECESSARY
             run : run
         };
     }());
 }( window.jQuery, _ ));
-

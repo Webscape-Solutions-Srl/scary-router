@@ -27,6 +27,7 @@ module.exports = (function( $ ) {
             }
         },
         stateMap = $.extend( true, {}, defaults),
+        phaseClasses = {},
         settablePropertyMap = {
             routes : false,
             routeDefaultOptions : false
@@ -221,24 +222,24 @@ module.exports = (function( $ ) {
             // Check if system call
             const callback = phase.indexOf('exit') === 0 ? window.exitCallback : routeObj.callback;
             /*jshint ignore:start*/
-            const callbackObj = new callback();
+            const callbackObj = new window[callback]();
             if (phase.match(/-page$/)) {
               switch (phase) {
                 case 'init-page':
-                  if (typeof Init === 'function') {
-                    await executePhase(Init, callback.name, params);
+                  if (typeof phaseClasses.Init === 'function') {
+                    await executePhase(phaseClasses.Init, callback.name, params);
                   }
                   break;
                 case 'content-page':
-                  if (typeof Content === 'function') {
-                    await executePhase(Content, callback.name, params);
+                  if (typeof phaseClasses.Content === 'function') {
+                    await executePhase(phaseClasses.Content, callback.name, params);
                   }
 
                   window.exitCallback = routeObj.callback;
                   break;
                 case 'exit-page':
-                  if (typeof Exit === 'function') {
-                    await executePhase(Exit, callback.name, params);
+                  if (typeof phaseClasses.Exit === 'function') {
+                    await executePhase(phaseClasses.Exit, callback.name, params);
                   }
                   break;
               }
@@ -251,7 +252,7 @@ module.exports = (function( $ ) {
             /*jshint ignore:end*/
           }
         } else {
-          $(document).trigger('404');
+          $(document).trigger('404', [ obj.route ]);
         }
     });
 
@@ -409,7 +410,7 @@ module.exports = (function( $ ) {
 
         if ( _checkRoute( route ) ){
             // Route pattern is ok, check callback
-            if ( callback === null || typeof callback  !== 'function') {
+            if (!callback) {
                 throw 'Router.addRoute: Missing callback or given callback is not a function';
             }
             // merge the given options from the user with the default options,
