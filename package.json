@@ -34,8 +34,8 @@
     "test": "gulp"
   },
   "dependencies": {
-    "jquery": "^2.2.0",
-    "lodash": "^4.3.0"
+    "jquery": "^3.6.1",
+    "lodash": "^4.17.21"
   },
   "devDependencies": {
     "browserify": "^13.0.0",
