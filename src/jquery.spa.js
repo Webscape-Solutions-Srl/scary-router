@@ -61,9 +61,9 @@ window.jQuery = window.jQuery || require('jquery');
          * @throws exception        - If the SPA plugin is not started yet (spa.run()).
          * @param {string} route
          */
-        navigate = function ( route ) {
+        navigate = function (route, force) {
             if ( hasStarted ) {
-                Router.navigate( route );
+                Router.navigate(route, force);
             } else {
                 throw 'Method spa.navigate() can not be called without starting the plugin, please call spa.run() before';
             }

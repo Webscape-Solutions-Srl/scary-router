@@ -130,9 +130,9 @@ module.exports = (function ( $ ){
      * @param {string} route                - The route string to navigate the browser to.
      * @fires <window>#popstate || <window>#hashchange
      */
-    navigate = function ( route ){
+    navigate = function ( route, force ){
         if ( stateMap.useHistoryApi && stateMap.hasHistoryApi ){
-            if ( _shouldUpdateCurrentLocation( route ) ) {
+            if (_shouldUpdateCurrentLocation( route ) || force) {
                 stateMap.history.pushState({
                     route : route,
                     data : {}
@@ -142,10 +142,14 @@ module.exports = (function ( $ ){
             $(window).trigger('popstate');
 
         } else {
-            if ( _shouldUpdateCurrentLocation( route ) ) {
+            if (_shouldUpdateCurrentLocation( route ) || force) {
                 stateMap.historyHashStates[route] = {};
             }
             window.location = '/#!' + route;
+
+            if (force) {
+              $(window).trigger('hashchange');
+            }
         }
     };
 

@@ -272,10 +272,10 @@ module.exports = (function( $ ) {
      *      an AJAX GET request depending on the configuration for the given route in this component.
      * @param {string} route            - The route string to navigate to.
      */
-    navigate = function ( route ) {
+    navigate = function (route, force) {
         if ( _findRoute( route, 'GET' ) >= 0 ) {
             // a route for the given string is defined, changing the URL relies always on the GET
-            History.navigate( route );
+            History.navigate(route, force);
             return;
         }
         throw 'jQuery SPA Error: The given route is not defined within the plugin';
