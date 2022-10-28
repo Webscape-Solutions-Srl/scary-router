@@ -214,6 +214,8 @@ module.exports = (function( $ ) {
             'content-page',
             'content'
           ];
+          const exitCb = typeof window[window.exitCallback] === 'function' ? new window[window.exitCallback] : undefined;
+          const actualCb = new window[routeObj.callback];
 
           for (let phase of phases) {
             if (phase.indexOf('exit') === 0 && typeof window.exitCallback === 'undefined') {
@@ -222,7 +224,7 @@ module.exports = (function( $ ) {
             // Check if system call
             const callback = phase.indexOf('exit') === 0 ? window.exitCallback : routeObj.callback;
             /*jshint ignore:start*/
-            const callbackObj = new window[callback]();
+            const callbackObj = phase.indexOf('exit') === 0 ? exitCb : actualCb;
             if (phase.match(/-page$/)) {
               switch (phase) {
                 case 'init-page':
