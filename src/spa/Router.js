@@ -221,6 +221,10 @@ module.exports = (function( $ ) {
             if (phase.indexOf('exit') === 0 && typeof window.exitCallback === 'undefined') {
               continue;
             }
+            if (phase.indexOf('init-page') === 0) {
+              // Trigger an event to inform of the actual URI
+              $(window).trigger('actual-url', [ obj.route ])
+            }
             // Check if system call
             const callback = phase.indexOf('exit') === 0 ? window.exitCallback : routeObj.callback;
             /*jshint ignore:start*/
