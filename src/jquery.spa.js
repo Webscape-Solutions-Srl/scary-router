@@ -5,6 +5,7 @@
  * Copyright (c) 2016 Christian Wasser
  * Licensed under the MIT license.
  */
+const Router = require("./spa/Router");
 const _ = _ || require('lodash');
 window.jQuery = window.jQuery || require('jquery');
 
@@ -44,7 +45,7 @@ window.jQuery = window.jQuery || require('jquery');
             configModule, configHistory, configRouter, configData,
             addRoutes, addRoute, removeRoute, hasRoute,
             navigate, createResource, updateResource, deleteResource, getResource,
-            setPhasesClasses, run;
+            setPhasesClasses, refresh, run;
         //------------------------- END MODULE SCOPE VARIABLES --------------------------------------
         //------------------------- BEGIN INTERNAL METHODS ------------------------------------------
         //------------------------- END INTERNAL METHODS --------------------------------------------
@@ -322,6 +323,10 @@ window.jQuery = window.jQuery || require('jquery');
 
         setPhasesClasses = function (classes) {
           Router.phaseClasses = classes;
+        };
+
+        refresh = function () {
+          Router.refresh();
         }
 
         //------------------------- END PUBLIC METHODS ----------------------------------------------
@@ -343,7 +348,9 @@ window.jQuery = window.jQuery || require('jquery');
             createResource : createResource,
             updateResource : updateResource,
             deleteResource : deleteResource,
+            // Webscape solutions
             setPhasesClasses: setPhasesClasses,
+            refresh: refresh,
             // Starting the plugin - NECESSARY
             run : run
         };

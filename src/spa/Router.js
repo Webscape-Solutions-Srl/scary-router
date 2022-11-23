@@ -37,10 +37,12 @@ module.exports = (function( $ ) {
         History = require('./History'),
         Util = require('./Util'),
 
+        currentRoute = null,
+
         _mergeRouteOptions, _checkRoute, _findRoute, _getRoute, _performDataRequest, _wrapCallbackForResource,
 
         navigate, createResource, updateResource, deleteResource, getResource,
-        addRoute, removeRoute, hasRoute, configModule;
+        addRoute, removeRoute, hasRoute, refresh, configModule;
 
     //----------------- END MODULE SCOPE VARIABLES ------------------------
     //----------------- BEGIN INTERNAL METHODS ----------------------------
@@ -205,6 +207,11 @@ module.exports = (function( $ ) {
             params.urlParams = urlParams;
           }
 
+          currentRoute = {
+            route: obj.route,
+            query: queryString
+          };
+
           // Handle route phases
           const phases = [
             'exit',
@@ -286,6 +293,17 @@ module.exports = (function( $ ) {
         }
         throw 'jQuery SPA Error: The given route is not defined within the plugin';
     };
+
+    /**
+     * @description Refresh current uri
+     */
+    refresh = function () {
+      if (typeof currentRoute !== 'undefined') {
+        const uri = currentRoute.route + (typeof currentRoute.query !== 'undefined' && currentRoute.query.length > 0 ? '?' + currentRoute.query : '');
+
+        navigate(uri, true);
+      }
+    }
 
     /**
      * @description This function will get an resource from the, in the jQuery SPA Data component
@@ -498,6 +516,7 @@ module.exports = (function( $ ) {
         deleteResource : deleteResource,
         addRoute : addRoute,
         removeRoute : removeRoute,
-        hasRoute : hasRoute
+        hasRoute : hasRoute,
+        refresh: refresh
     };
 }( window.jQuery ));
