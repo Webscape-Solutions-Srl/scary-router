@@ -45,7 +45,7 @@ window.jQuery = window.jQuery || require('jquery');
             configModule, configHistory, configRouter, configData,
             addRoutes, addRoute, removeRoute, hasRoute,
             navigate, createResource, updateResource, deleteResource, getResource,
-            setPhasesClasses, refresh, run;
+            setPhasesClasses, refresh, currentUri, currentRoute, run;
         //------------------------- END MODULE SCOPE VARIABLES --------------------------------------
         //------------------------- BEGIN INTERNAL METHODS ------------------------------------------
         //------------------------- END INTERNAL METHODS --------------------------------------------
@@ -329,6 +329,14 @@ window.jQuery = window.jQuery || require('jquery');
           Router.refresh();
         }
 
+        currentUri = function () {
+          return Router.currentRoute();
+        }
+
+        currentRoute = function () {
+          return Router.currentRoute(true);
+        }
+
         //------------------------- END PUBLIC METHODS ----------------------------------------------
         return {
             // Plugin configuration functions
@@ -351,6 +359,8 @@ window.jQuery = window.jQuery || require('jquery');
             // Webscape solutions
             setPhasesClasses: setPhasesClasses,
             refresh: refresh,
+            currentUri: currentUri,
+            currentRoute: currentRoute,
             // Starting the plugin - NECESSARY
             run : run
         };

@@ -37,12 +37,10 @@ module.exports = (function( $ ) {
         History = require('./History'),
         Util = require('./Util'),
 
-        currentRoute = null,
-
         _mergeRouteOptions, _checkRoute, _findRoute, _getRoute, _performDataRequest, _wrapCallbackForResource,
 
         navigate, createResource, updateResource, deleteResource, getResource,
-        addRoute, removeRoute, hasRoute, refresh, configModule;
+        addRoute, removeRoute, hasRoute, refresh, currentRoute, configModule;
 
     //----------------- END MODULE SCOPE VARIABLES ------------------------
     //----------------- BEGIN INTERNAL METHODS ----------------------------
@@ -207,7 +205,7 @@ module.exports = (function( $ ) {
             params.urlParams = urlParams;
           }
 
-          currentRoute = {
+          stateMap.currentRoute = {
             route: obj.route,
             query: queryString
           };
@@ -298,10 +296,8 @@ module.exports = (function( $ ) {
      * @description Refresh current uri
      */
     refresh = function () {
-      if (typeof currentRoute !== 'undefined') {
-        const uri = currentRoute.route + (typeof currentRoute.query !== 'undefined' && currentRoute.query.length > 0 ? '?' + currentRoute.query : '');
-
-        navigate(uri, true);
+      if (typeof stateMap.currentRoute !== 'undefined') {
+        navigate(currentRoute(), true);
       }
     }
 
@@ -485,6 +481,10 @@ module.exports = (function( $ ) {
         }
     };
 
+    currentRoute = function (routeOnly) {
+      return routeOnly ? stateMap.currentRoute.route : stateMap.currentRoute.route + (typeof stateMap.currentRoute.query !== 'undefined' && stateMap.currentRoute.query.length > 0 ? '?' + stateMap.currentRoute.query : '');
+    }
+
     // --------------------- BEGIN CONFIG ---------------------------------
     /**
      * @description This function will configure the jQuery SPA Router component with some
@@ -508,15 +508,16 @@ module.exports = (function( $ ) {
     //----------------- END PUBLIC METHODS --------------------------------
 
     return {
-        configModule : configModule,
-        navigate : navigate,
-        getResource : getResource,
-        createResource : createResource,
-        updateResource : updateResource,
-        deleteResource : deleteResource,
-        addRoute : addRoute,
-        removeRoute : removeRoute,
-        hasRoute : hasRoute,
-        refresh: refresh
+      configModule : configModule,
+      navigate : navigate,
+      getResource : getResource,
+      createResource : createResource,
+      updateResource : updateResource,
+      deleteResource : deleteResource,
+      addRoute : addRoute,
+      removeRoute : removeRoute,
+      hasRoute : hasRoute,
+      currentRoute: currentRoute,
+      refresh: refresh
     };
 }( window.jQuery ));
